@@ -8,7 +8,6 @@ pipeline {
     stages {
         stage('clone') {
             steps {
-                sh 'cd frontend'
                 script {
                     if (fileExists("frontend")) {
                         println 'frontend is already existing'
