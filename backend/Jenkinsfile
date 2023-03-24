@@ -5,7 +5,6 @@ pipeline {
         WEBHOOK_URL = credentials('DiscordWebhookMT')
         BUCKET = 'maksym-team-bucket'
         REGION = 'eu-central-1'
-        LOGS = "${BUILD_URL}" + "consoleText"
     }
     stages {
         stage('Build') {
@@ -46,7 +45,7 @@ pipeline {
     }
     post {
         always {
-            discordSend description: "Status: `${currentBuild.currentResult}`\nBuild log: ${LOGS}",
+            discordSend description: "Status: `${currentBuild.currentResult}`\nBuild log: ${BUILD_URL}consoleText",
                 link: env.BUILD_URL,
                 result: currentBuild.currentResult,
                 title: JOB_NAME,
