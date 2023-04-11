@@ -16,6 +16,7 @@ pipeline {
             steps {
                 git branch: 'dev', url: 'https://github.com/Team-Maksym/backend.git'
                 sh '''
+                    rm -f .env
                     export JAVA_HOME="/lib/jvm/jdk-17"
 
                     export BUCKET="maksym-team-backend"
@@ -27,7 +28,6 @@ pipeline {
                     export DB_PASSWORD=${DATABASE_PASSWORD}
                     export DB_URL=${DATABASE_URL}
 
-                    rm -f .env
                     export SPRING_PROFILES_ACTIVE=prod
 
                     chmod 744 ./mvnw
