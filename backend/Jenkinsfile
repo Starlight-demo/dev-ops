@@ -1,0 +1,57 @@
+pipeline {
+    agent none
+    environment {
+        SERVER_CREDENTIALS = 's3-access'
+        WEBHOOK_URL = credentials('DiscordWebhookMT')
+        BUCKET = 'maksym-team-bucket'
+        REGION = 'eu-central-1'
+    }
+    stages {
+        stage('Build') {
+            agent { label 'java && jdk-17' }
+            steps {
+                git branch: 'dev', url: 'https://github.com/Team-Maksym/backend.git'
+                sh '''
+                    export JAVA_HOME="/lib/jvm/jdk-17"
+                    chmod 744 ./mvnw
+                    rm -f .env
+                    echo "SPRING_PROFILES_ACTIVE=prod" >> .env
+                    ./mvnw clean package
+                    cp ./target/backend*.jar ./backend-${BUILD_NUMBER}.jar
+                '''
+                withAWS(credentials: "${SERVER_CREDENTIALS}", region: "${REGION}") {
+                    script {
+                        s3Upload(file: "./backend-${BUILD_NUMBER}.jar", bucket: "${BUCKET}", path:"backend/main/backend-${BUILD_NUMBER}.jar")
+                    }
+                }
+                sh 'rm ./backend-${BUILD_NUMBER}.jar'
+            }
+        }
+        stage('Deploy') {
+            agent { label 'java && target' }
+            steps {
+                withAWS(credentials: "${SERVER_CREDENTIALS}", region: "${REGION}") {
+                    script {
+                        s3Download(file:"./backend-${BUILD_NUMBER}.jar", bucket:"${BUCKET}", path:"backend/main/backend-${BUILD_NUMBER}.jar")
+                    }
+                }
+                sh '''
+                    sudo systemctl stop starlight || true
+                    chmod 755 ./backend/install-systemd-service.sh
+                    ./backend/install-systemd-service.sh
+                    mv -f ./backend-${BUILD_NUMBER}.jar ~/backend.jar
+                    sudo systemctl enable starlight --now
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            discordSend description: "Status: `${currentBuild.currentResult}`\nBuild log: ${BUILD_URL}consoleText",
+                link: env.BUILD_URL,
+                result: currentBuild.currentResult,
+                title: JOB_NAME,
+                webhookURL: "${env.WEBHOOK_URL}"
+        }
+    }
+}
