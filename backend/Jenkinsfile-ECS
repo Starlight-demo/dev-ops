@@ -57,7 +57,7 @@ pipeline {
             steps {
                 unstash 'jar'
                 sh '''
-                    sudo systemctl stop talantino || true
+                    sudo systemctl stop starlight || true
                     chmod 755 ./backend/install-systemd-service.sh
                     ./backend/install-systemd-service.sh
                     mv -f ./backend.jar ~/backend.jar
