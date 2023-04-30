@@ -2,12 +2,14 @@ pipeline {
     agent { label 'frontend' }
     environment {
         SERVER_CREDENTIALS = 's3-access'
-        WEBHOOK_URL = credentials('DiscordWebhookMT')
         BUCKET = 'maksym-team-bucket'
+        
         API_URL = credentials('url_back_mt')
         REGION = 'eu-central-1'
         FRONTEND_ACCESS_KEY = credentials('mt_frontend_access_key')
         FRONTEND_SECRET_KEY = credentials('mt_frontend_secret_key')
+
+        WEBHOOK_URL = credentials('DiscordWebhookMT')
     }
     stages {
         stage('clone') {
