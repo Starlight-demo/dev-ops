@@ -3,12 +3,14 @@ pipeline {
     environment {
         SERVER_CREDENTIALS = 's3-access'
         BUCKET = 'maksym-team-bucket'
+        
         REGION = 'eu-central-1'
         BACKEND_ACCESS_KEY = credentials('mt_backend_access_key')
         BACKEND_SECRET_KEY = credentials('mt_backend_secret_key')
         DATABASE_URL = credentials('mt_database_url')
         DATABASE_PASSWORD = credentials('mt_database_password')
         WEBHOOK_URL = credentials('DiscordWebhookMT')
+
         EC2_BACKEND_ID=credentials('EC2-backend-id')
 
     }
